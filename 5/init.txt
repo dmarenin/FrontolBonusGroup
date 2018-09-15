@@ -1,0 +1,1352 @@
+﻿function Get_id_store(){
+	return ""
+}
+
+function GetIdCompany()
+{
+	return ""
+}
+
+function GetApiKey()
+{
+	return ""
+}
+
+function GetHttpAdress()
+{
+    return "https://marketapi.bonusgroups.ru"
+}
+
+function GetServerMapUser()
+{
+	return "https://posmapper.bonusgroups.ru"
+}
+
+function init()
+{
+  frontol.addEventListener("closeDocument", "BeforeCloseDoc", true)
+
+  if (typeof JSON !== "object") {
+    JSON = {};
+  }
+
+  (function () {
+    "use strict";
+
+    var rx_one = /^[\],:{}\s]*$/;
+    var rx_two = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g;
+    var rx_three = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g;
+    var rx_four = /(?:^|:|,)(?:\s*\[)+/g;
+    var rx_escapable = /[\\"\u0000-\u001f\u007f-\u009f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g;
+    var rx_dangerous = /[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g;
+
+    function f(n) {
+        return n < 10
+            ? "0" + n
+            : n;
+    }
+
+    function this_value() {
+        return this.valueOf();
+    }
+
+    if (typeof Date.prototype.toJSON !== "function") {
+
+        Date.prototype.toJSON = function () {
+
+            return isFinite(this.valueOf())
+                ? this.getUTCFullYear() + "-" +
+                        f(this.getUTCMonth() + 1) + "-" +
+                        f(this.getUTCDate()) + "T" +
+                        f(this.getUTCHours()) + ":" +
+                        f(this.getUTCMinutes()) + ":" +
+                        f(this.getUTCSeconds()) + "Z"
+                : null;
+        };
+
+        Boolean.prototype.toJSON = this_value;
+        Number.prototype.toJSON = this_value;
+        String.prototype.toJSON = this_value;
+    }
+
+    var gap;
+    var indent;
+    var meta;
+    var rep;
+
+    function quote(string) {
+        rx_escapable.lastIndex = 0;
+        return rx_escapable.test(string)
+            ? "\"" + string.replace(rx_escapable, function (a) {
+                var c = meta[a];
+                return typeof c === "string"
+                    ? c
+                    : "\\u" + ("0000" + a.charCodeAt(0).toString(16)).slice(-4);
+            }) + "\""
+            : "\"" + string + "\"";
+    }
+
+    function str(key, holder) {
+        var i;
+        var k;
+        var v;
+        var length;
+        var mind = gap;
+        var partial;
+        var value = holder[key];
+        if (value && typeof value === "object" &&
+                typeof value.toJSON === "function") {
+            value = value.toJSON(key);
+        }
+        if (typeof rep === "function") {
+            value = rep.call(holder, key, value);
+        }
+        switch (typeof value) {
+        case "string":
+            return quote(value);
+
+        case "number":
+            return isFinite(value)
+                ? String(value)
+                : "null";
+
+        case "boolean":
+        case "null":
+            return String(value);
+        case "object":
+            if (!value) {
+                return "null";
+            }
+            gap += indent;
+            partial = [];
+            if (Object.prototype.toString.apply(value) === "[object Array]") {
+                length = value.length;
+                for (i = 0; i < length; i += 1) {
+                    partial[i] = str(i, value) || "null";
+                }
+                v = partial.length === 0
+                    ? "[]"
+                    : gap
+                        ? "[\n" + gap + partial.join(",\n" + gap) + "\n" + mind + "]"
+                        : "[" + partial.join(",") + "]";
+                gap = mind;
+                return v;
+            }
+            if (rep && typeof rep === "object") {
+                length = rep.length;
+                for (i = 0; i < length; i += 1) {
+                    if (typeof rep[i] === "string") {
+                        k = rep[i];
+                        v = str(k, value);
+                        if (v) {
+                            partial.push(quote(k) + (
+                                gap
+                                    ? ": "
+                                    : ":"
+                            ) + v);
+                        }
+                    }
+                }
+            } else {
+                for (k in value) {
+                    if (Object.prototype.hasOwnProperty.call(value, k)) {
+                        v = str(k, value);
+                        if (v) {
+                            partial.push(quote(k) + (
+                                gap
+                                    ? ": "
+                                    : ":"
+                            ) + v);
+                        }
+                    }
+                }
+            }
+            v = partial.length === 0
+                ? "{}"
+                : gap
+                    ? "{\n" + gap + partial.join(",\n" + gap) + "\n" + mind + "}"
+                    : "{" + partial.join(",") + "}";
+            gap = mind;
+            return v;
+        }
+    }
+    if (typeof JSON.stringify !== "function") {
+        meta = {
+            "\b": "\\b",
+            "\t": "\\t",
+            "\n": "\\n",
+            "\f": "\\f",
+            "\r": "\\r",
+            "\"": "\\\"",
+            "\\": "\\\\"
+        };
+        JSON.stringify = function (value, replacer, space) {
+            var i;
+            gap = "";
+            indent = "";
+            if (typeof space === "number") {
+                for (i = 0; i < space; i += 1) {
+                    indent += " ";
+                }
+            } else if (typeof space === "string") {
+                indent = space;
+            }
+            rep = replacer;
+            if (replacer && typeof replacer !== "function" &&
+                    (typeof replacer !== "object" ||
+                    typeof replacer.length !== "number")) {
+                throw new Error("JSON.stringify");
+            }
+
+            return str("", {"": value});
+        };
+    }
+    if (typeof JSON.parse !== "function") {
+        JSON.parse = function (text, reviver) {
+            var j;
+            function walk(holder, key) {
+                var k;
+                var v;
+                var value = holder[key];
+                if (value && typeof value === "object") {
+                    for (k in value) {
+                        if (Object.prototype.hasOwnProperty.call(value, k)) {
+                            v = walk(value, k);
+                            if (v !== undefined) {
+                                value[k] = v;
+                            } else {
+                                delete value[k];
+                            }
+                        }
+                    }
+                }
+                return reviver.call(holder, key, value);
+            }
+            text = String(text);
+            rx_dangerous.lastIndex = 0;
+            if (rx_dangerous.test(text)) {
+                text = text.replace(rx_dangerous, function (a) {
+                    return "\\u" +
+                            ("0000" + a.charCodeAt(0).toString(16)).slice(-4);
+                });
+            }
+            if (
+                rx_one.test(
+                    text
+                        .replace(rx_two, "@")
+                        .replace(rx_three, "]")
+                        .replace(rx_four, "")
+                )
+            ) {
+                j = eval("(" + text + ")");
+
+                return (typeof reviver === "function")
+                    ? walk({"": j}, "")
+                    : j;
+            }
+            throw new SyntaxError("JSON.parse");
+        };
+    }
+}());
+
+}
+
+
+
+function GetSellerId(id_store)
+{
+	id_external = frontol.currentUser.code.toString()
+	id_company = GetIdCompany()
+	addr = GetServerMapUser()
+
+    xmlhttp = new ActiveXObject("Microsoft.XMLHTTP")
+
+    try
+    {
+        xmlhttp.open("GET", addr+"/api/get_user?id_company="+id_company+"&id_store="+id_store+"&id_external="+id_external+"&id_soft=1", false)
+    }
+    catch (E)
+    {
+        return null;
+    }
+
+    xmlhttp.setRequestHeader("Accept", "application/json")
+    xmlhttp.setRequestHeader("Authorization", GetApiKey())
+    xmlhttp.setRequestHeader("If-Modified-Since", new Date());
+    try
+    {
+        xmlhttp.send(null)
+	}
+    catch (E)
+    {
+    }
+
+    if(xmlhttp.status!=200)
+    {
+        return null
+    }
+
+    return xmlhttp.responseText
+}
+
+
+function GetCustomerInfoByPhone(Phone)
+{
+    xmlhttp = new ActiveXObject("Microsoft.XMLHTTP")
+
+    try
+    {
+        xmlhttp.open("GET", GetHttpAdress()+"/api/v1/customers?phoneNumber="+Phone, false)
+    }
+    catch (E)
+    {
+        return null;
+    }
+
+    xmlhttp.setRequestHeader("Accept", "application/json")
+    xmlhttp.setRequestHeader("Authorization", GetApiKey())
+    xmlhttp.setRequestHeader("If-Modified-Since", new Date());
+    try
+    {
+        xmlhttp.send(null)
+	}
+    catch (E)
+    {
+    }
+
+    if(xmlhttp.status!=200)
+    {
+        return null
+    }
+
+    return xmlhttp.responseText
+}
+
+function GetCustomerInfoByCard(Card)
+{
+    xmlhttp = new ActiveXObject("Microsoft.XMLHTTP")
+
+    try
+    {
+        xmlhttp.open("GET", GetHttpAdress()+"/api/v1/customers?cardNumber="+Card, false)
+    }
+    catch (E)
+    {
+        return null;
+    }
+
+    xmlhttp.setRequestHeader("Accept", "application/json")
+    xmlhttp.setRequestHeader("Authorization", GetApiKey())
+    xmlhttp.setRequestHeader("If-Modified-Since", new Date());
+    try
+    {
+        xmlhttp.send(null)
+	}
+    catch (E)
+    {
+    }
+
+    if(xmlhttp.status!=200)
+    {
+        return null
+    }
+
+    return xmlhttp.responseText
+}
+
+function GetCompany()
+{
+    xmlhttp = new ActiveXObject("Microsoft.XMLHTTP")
+
+    try
+    {
+        xmlhttp.open("GET", GetHttpAdress()+"/api/v1/stores", false)
+    }
+    catch (E)
+    {
+        return null
+    }
+
+    xmlhttp.setRequestHeader("Accept", "application/json")
+    xmlhttp.setRequestHeader("Authorization", GetApiKey())
+    xmlhttp.setRequestHeader("If-Modified-Since", new Date());
+
+    try
+    {
+		xmlhttp.send(null)
+	}
+    catch (E)
+    {
+    }
+    if(xmlhttp.status!=200)
+    {
+        return null
+    }
+
+    return xmlhttp.responseText
+}
+
+function GetStore()
+{
+    xmlhttp = new ActiveXObject("Microsoft.XMLHTTP")
+
+    try
+    {
+        xmlhttp.open("GET", GetHttpAdress()+"/api/v1/stores/"+frontol.currentDocument.enterprise.code.toString(), false)
+    }
+    catch (E)
+    {
+        return null
+    }
+
+    xmlhttp.setRequestHeader("Accept", "application/json")
+    xmlhttp.setRequestHeader("Authorization", GetApiKey())
+    xmlhttp.setRequestHeader("If-Modified-Since", new Date());
+
+    try
+    {
+		xmlhttp.send(null)
+	}
+    catch (E)
+    {
+    }
+
+    if(xmlhttp.status!=200)
+    {
+        return null
+    }
+
+    return xmlhttp.responseText
+}
+
+function GetStoreSetting()
+{
+    xmlhttp = new ActiveXObject("Microsoft.XMLHTTP")
+
+    try
+    {
+        xmlhttp.open("GET", GetHttpAdress()+"/api/v1/settings/offline-stores", false)
+    }
+    catch (E)
+    {
+        return null
+    }
+
+    xmlhttp.setRequestHeader("Accept", "application/json")
+    xmlhttp.setRequestHeader("Authorization", GetApiKey())
+    xmlhttp.setRequestHeader("If-Modified-Since", new Date());
+
+    try
+    {
+		xmlhttp.send(null)
+	}
+    catch (E)
+    {
+    }
+
+    if(xmlhttp.status!=200)
+    {
+        return null
+    }
+
+    return xmlhttp.responseText
+}
+
+function GetPromotions()
+{
+    xmlhttp = new ActiveXObject("Microsoft.XMLHTTP")
+
+    try
+    {
+        xmlhttp.open("GET", GetHttpAdress()+"/api/v1/promotions/", false)
+    }
+    catch (E)
+    {
+        return null
+    }
+
+    xmlhttp.setRequestHeader("Accept", "application/json")
+    xmlhttp.setRequestHeader("Authorization", GetApiKey())
+    xmlhttp.setRequestHeader("If-Modified-Since", new Date());
+
+    try
+    {
+		xmlhttp.send(null)
+	}
+    catch (E)
+    {
+    }
+
+    if(xmlhttp.status!=200)
+    {
+        return null
+    }
+
+    return xmlhttp.responseText
+}
+
+function GetTotalAmount(customerId)
+{
+    xmlhttp = new ActiveXObject("Microsoft.XMLHTTP")
+
+    try
+    {
+        xmlhttp.open("GET", GetHttpAdress()+"/api/v1/customers/"+customerId+"/bonuses/info/", false)
+    }
+    catch (E)
+    {
+        return null
+    }
+
+    xmlhttp.setRequestHeader("Accept", "application/json")
+    xmlhttp.setRequestHeader("Authorization", GetApiKey())
+    xmlhttp.setRequestHeader("If-Modified-Since", new Date());
+
+    try
+    {
+		xmlhttp.send(null)
+	}
+    catch (E)
+    {
+		return null
+    }
+
+    return  xmlhttp.responseText
+}
+
+
+
+function GetTextMessage(CustomerInfo, _totalAmount, percentPerPurchase, decreaseOnPercent, MaxAvailableSumm)
+{
+
+    return "Сумма к оплате "+frontol.currentDocument.sum+"\n"+
+           "Всего бонусов на счете "+_totalAmount+"\n"+
+           "Скидка по акции "+decreaseOnPercent*frontol.currentDocument.sum/100+"\n"+
+		   "Макс доступная скидка "+MaxAvailableSumm+"\n"+
+           "Будет зачислено "+percentPerPurchase*frontol.currentDocument.sum/100+"\n"+
+		   "Списать бонусы дополнительно:"
+}
+
+function roundPlus(x, n)
+{
+
+  if(isNaN(x) || isNaN(n)) return false;
+
+  var m = Math.pow(10,n);
+
+  return Math.round(x*m)/m;
+
+}
+
+function debug_mess_box(str){
+	frontol.actions.showMessage(str, Icon.Error)
+}
+
+
+function wso_ButtonClick(Sender)
+{
+	Customer = JSON.parse(wso_form.Get("val_Customer").text)
+
+	gender = "female"
+
+	if (wso_form.Get("val_male").ItemIndex==0){
+		gender = "male"
+	}
+
+	year = wso_form.Get("val_birth").Value.year
+	month = wso_form.Get("val_birth").Value.month
+	day = wso_form.Get("val_birth").Value.day
+
+	birth = day.toString()+"-"+month.toString()+"-"+year.toString()
+
+	Customer.firstName = wso_form.Get("val_name").text
+
+	Customer.phoneNumber = wso_form.Get("val_phone").text
+	Customer.cardNumber = wso_form.Get("val_number_card").text
+	Customer.lastName = wso_form.Get("val_family").text
+	Customer.surname = wso_form.Get("val_surname").text
+
+	Customer.gender = gender
+	Customer.birthday = birth
+
+	if (Customer.customerId==null) {
+
+		sellerId = wso_form.Get("val_sellerId").text
+
+		storeId = wso_form.Get("val_storeId").text
+
+		textPost = JSON.stringify(Customer)
+
+		try
+        {
+            xmlhttp.open("POST", GetHttpAdress()+"/api/v1/customers?sellerId="+sellerId+"&storeId="+storeId, false)
+        }
+        catch (E)
+        {
+            frontol.actions.showMessage("Сервер не доступен", Icon.Error)
+			frontol.actions.showMessage(xmlhttp.status, Icon.Error)
+
+			return
+        }
+
+		xmlhttp.setRequestHeader("Content-Type", "application/json")
+        xmlhttp.setRequestHeader("Authorization", GetApiKey())
+
+		xmlhttp.send(textPost);
+
+        if(xmlhttp.status!=201)
+        {
+            frontol.actions.showMessage("Ошибка добавления нового клиента", Icon.Error)
+            frontol.actions.showMessage(GetHttpAdress()+"/api/v1/customers?sellerId="+sellerId+"&storeId="+storeId, Icon.Error)
+            frontol.actions.showMessage(xmlhttp.status, Icon.Error)
+            frontol.actions.showMessage(textPost, Icon.Error)
+
+            frontol.actions.cancel()
+
+			return
+        }
+
+		Customer = JSON.parse(xmlhttp.responseText)
+	}
+	else{
+
+		Customer.isFirstNameChanged = true
+		Customer.isLastNameChanged = true
+		Customer.isSurnameChanged = true
+		Customer.isGenderChanged = true
+		Customer.isBirthdayChanged = true
+		Customer.isCardNumberChanged = true
+		Customer.isPhoneNumberChanged = true
+
+		textPost = JSON.stringify(Customer)
+
+		xmlhttp = new ActiveXObject("Microsoft.XMLHTTP")
+        try
+        {
+            xmlhttp.open("PUT", GetHttpAdress()+"/api/v1/customers/"+Customer.customerId, false)
+        }
+        catch (E)
+        {
+            frontol.actions.showMessage("Сервер не доступен", Icon.Error)
+			frontol.actions.showMessage(xmlhttp.status, Icon.Error)
+
+			return
+        }
+
+		xmlhttp.setRequestHeader("Content-Type", "application/json")
+        xmlhttp.setRequestHeader("Authorization", GetApiKey())
+
+        try
+        {
+		    xmlhttp.send(textPost);
+		}
+		catch (E)
+        {
+		}
+
+        if(xmlhttp.status!=1223)
+        {
+            frontol.actions.showMessage("Ошибка обновления данных клиента", Icon.Error)
+            frontol.actions.showMessage(GetHttpAdress()+"/api/v1/customers/"+Customer.customerId, Icon.Error)
+            frontol.actions.showMessage(xmlhttp.status, Icon.Error)
+            frontol.actions.showMessage(textPost, Icon.Error)
+
+            frontol.actions.cancel()
+
+			return
+        }
+	}
+
+	wso_form.UserData = Customer
+
+    //wso_form.Close()
+
+}
+
+function wso_ButtonClick_Invite(Sender)
+{
+	val_family = wso_form1.Get("val_family").text
+    val_phone = wso_form1.Get("val_phone").text
+	val_storeId = wso_form1.Get("val_storeId").text
+	val_cutomerId = wso_form1.Get("val_cutomerId").text
+
+	op = {toPhones:[]}
+
+	op.toPhones.push({phoneNumber:val_phone, fullName:val_family})
+
+    textPost = JSON.stringify(op)
+
+	try
+    {
+        xmlhttp.open("POST", GetHttpAdress()+"/api/v1/customers/"+val_cutomerId+"/coupons/share?storeId="+val_storeId, false)
+    }
+    catch (E)
+    {
+        frontol.actions.showMessage("Сервер не доступен", Icon.Error)
+	    frontol.actions.showMessage(xmlhttp.status, Icon.Error)
+		return
+    }
+
+    xmlhttp.setRequestHeader("Content-Type", "application/json")
+    xmlhttp.setRequestHeader("Authorization", GetApiKey())
+
+	xmlhttp.send(textPost);
+
+    if(xmlhttp.status!=201)
+    {
+        frontol.actions.showMessage("Ошибка приглашения нового клиента", Icon.Error)
+        frontol.actions.showMessage(GetHttpAdress()+"/api/v1/customers/"+val_cutomerId+"/coupons/share?storeId="+val_storeId, Icon.Error)
+        frontol.actions.showMessage(xmlhttp.status, Icon.Error)
+        frontol.actions.showMessage(textPost, Icon.Error)
+
+        frontol.actions.cancel()
+
+	    return
+    }
+}
+
+function wso_InviteOpenForm(Sender)
+{
+	storeId = wso_form.Get("val_storeId").text
+
+	Customer = JSON.parse(wso_form.Get("val_Customer").text)
+
+	customerId = Customer.customerId
+
+    wso_form.Close()
+
+	CreateFormInviteFriend(storeId, customerId)
+}
+
+function CreateFormClientInfo(Customer, storeId, sellerId, PromoCode)
+{
+	if (Customer==null){
+
+		Customer = {firstName: null, phoneNumber: null, cardNumber: null, lastName: null, surname: null, gender: "male", birthday:null}
+
+		if (PromoCode.length==11){
+
+			Customer.phoneNumber = PromoCode
+		}
+		else{
+
+			Customer.cardNumber = PromoCode
+		}
+	}
+
+    wso = new ActiveXObject("Scripting.WindowSystemObject")
+
+    wso.EnableVisualStyles = true
+
+    wso_form = wso.CreateForm(0,0,0,0)
+
+    wso_form.ClientWidth = 260
+    wso_form.ClientHeight = 300
+    wso_form.ToolWindow = true
+	wso_form.Text = "Информация о клиенте"
+	wso_form.SizeGrip = false
+    wso_form.Height = 300
+    wso_form.Left = 0
+    wso_form.Top = 0
+    wso_form.Width = 260
+
+    wso_form.CenterControl()
+
+    //txt
+    txt_family = wso_form.CreateEdit(2, 2, 92, 19)
+    txt_family.Text = "Фамилия:"
+    txt_family.ClientHeight = 19
+    txt_family.ClientWidth = 92
+    txt_family.ParentColor = -1
+    txt_family.Border = 0
+    txt_family.ReadOnly = -1
+	txt_family.Id = "txt_family"
+
+    txt_name = wso_form.CreateEdit(2, 32, 92, 19)
+    txt_name.Text = "Имя:"
+    txt_name.ClientHeight = 19
+    txt_name.ClientWidth = 92
+    txt_name.ParentColor = -1
+    txt_name.Border = 0
+    txt_name.ReadOnly = -1
+	txt_name.Id = "txt_name"
+
+    txt_phone = wso_form.CreateEdit(2, 62, 92, 19)
+    txt_phone.Text = "Телефон:"
+    txt_phone.ClientHeight = 19
+    txt_phone.ClientWidth = 92
+    txt_phone.ParentColor = -1
+    txt_phone.Border = 0
+    txt_phone.ReadOnly = -1
+    txt_phone.Id = "txt_phone"
+
+	txt_surname = wso_form.CreateEdit(2, 92, 92, 19)
+    txt_surname.Text = "Отчество:"
+    txt_surname.ClientHeight = 19
+    txt_surname.ClientWidth = 92
+    txt_surname.ParentColor = -1
+    txt_surname.Border = 0
+    txt_surname.ReadOnly = -1
+    txt_surname.Id = "txt_surname"
+
+    txt_number_card = wso_form.CreateEdit(2, 122, 92, 19)
+    txt_number_card.Text = "Номер карты:"
+    txt_number_card.ClientHeight = 19
+    txt_number_card.ClientWidth = 92
+    txt_number_card.ParentColor = -1
+    txt_number_card.Border = 0
+    txt_number_card.ReadOnly = -1
+    txt_number_card.Id = "txt_number_card"
+
+    txt_male = wso_form.CreateEdit(2, 152, 92, 19)
+    txt_male.Text = "Пол:"
+    txt_male.ClientHeight = 19
+    txt_male.ClientWidth = 92
+    txt_male.ParentColor = -1
+    txt_male.Border = 0
+    txt_male.ReadOnly = -1
+	txt_male.Id = "txt_male"
+
+    txt_birth = wso_form.CreateEdit(2, 182, 92, 19)
+    txt_birth.Text = "Дата рождения:"
+    txt_birth.ClientHeight = 19
+    txt_birth.ClientWidth = 92
+    txt_birth.ParentColor = -1
+    txt_birth.Border = 0
+    txt_birth.ReadOnly = -1
+	txt_birth.Id = "txt_birth"
+
+   /*  txt_coupon = wso_form.CreateEdit(2, 212, 92, 19)
+    txt_coupon.Text = "Купон:"
+    txt_coupon.ClientHeight = 19
+    txt_coupon.ClientWidth = 92
+    txt_coupon.ParentColor = -1
+    txt_coupon.Border = 0
+    txt_coupon.ReadOnly = -1
+	txt_coupon.Id = "txt_coupon"
+ */
+    //val
+    val_family = wso_form.CreateEdit(99, 2, 150, 19)
+    val_family.ClientHeight = 19
+    val_family.ClientWidth = 146
+	if (Customer.lastName!=null){
+        val_family.Text = Customer.lastName
+	}
+	val_family.Id = "val_family"
+
+	val_name = wso_form.CreateEdit(99, 32, 150, 19)
+    val_name.ClientHeight = 19
+    val_name.ClientWidth = 146
+	if (Customer.firstName!=null){
+        val_name.Text = Customer.firstName
+	}
+    val_name.Id = "val_name"
+
+	val_phone = wso_form.CreateEdit(99, 62, 150, 19)
+    val_phone.ClientHeight = 19
+    val_phone.ClientWidth = 146
+    if (Customer.phoneNumber!=null){
+        val_phone.Text = Customer.phoneNumber
+	}
+	val_phone.Id = "val_phone"
+
+	val_surname = wso_form.CreateEdit(99, 92, 150, 19)
+    val_surname.ClientHeight = 19
+    val_surname.ClientWidth = 146
+    if (Customer.surname!=null){
+        val_surname.Text = Customer.surname
+	}
+	val_surname.Id = "val_surname"
+
+    val_number_card = wso_form.CreateEdit(99, 122, 150, 19)
+    val_number_card.ClientHeight = 19
+    val_number_card.ClientWidth = 146
+    if (Customer.cardNumber!=null){
+        val_number_card.Text = Customer.cardNumber
+	}
+	val_number_card.Id = "val_number_card"
+
+    val_male = wso_form.CreateComboBox(99, 152, 150, 19)
+    val_male.Add("М")
+    val_male.Add("Ж")
+    val_male.ClientHeight = 19
+    val_male.ClientWidth = 150
+    if (Customer.gender!=null){
+         val_male.ItemIndex=1
+		 if (Customer.gender=="male"){
+			 val_male.ItemIndex=0
+		 }
+	}
+	val_male.Id = "val_male"
+
+    val_birth = wso_form.CreateDateTimePicker(99, 182, 150, 19)
+    val_birth.ClientHeight = 19
+    val_birth.ClientWidth = 150
+    if (Customer.birth!=null){
+
+		if (Customer.birth.year!=null){
+			val_birth.Value.year = Customer.birth.year
+		}
+		if (Customer.birth.month!=null){
+			val_birth.Value.month = Customer.birth.month
+		}
+		if (Customer.birth.day!=null){
+			val_birth.Value.day = Customer.birth.day
+		}
+	}
+	val_birth.Id = "val_birth"
+
+/* 	val_coupon = wso_form.CreateEdit(99, 212, 150, 19)
+    val_coupon.ClientHeight = 19
+    val_coupon.ClientWidth = 146
+    val_coupon.Id = "val_coupon" */
+
+    b_save = wso_form.CreateButton(0, 212, 253, 28, "Сохранить")
+    b_save.OnClick = wso_ButtonClick
+
+	b_invite = wso_form.CreateButton(0, 242, 253, 28, "Пригласить друга")
+    b_invite.OnClick = wso_InviteOpenForm
+
+	if (Customer.customerId==null){
+
+		b_invite.visible = false
+
+	}
+
+	val_Customer = wso_form.CreateEdit(0, 255, 1, 1)
+    val_Customer.Text = JSON.stringify(Customer)
+    val_Customer.Id = "val_Customer"
+
+	val_sellerId = wso_form.CreateEdit(0, 256, 1, 1)
+    val_sellerId.Text = sellerId.toString()
+    val_sellerId.Id = "val_sellerId"
+
+	val_storeId = wso_form.CreateEdit(0, 257, 1, 1)
+    val_storeId.Text = storeId
+    val_storeId.Id = "val_storeId"
+
+	wso_form.UserData = Customer
+
+    wso_form.ShowModal()
+
+    wso.Run()
+
+	Customer = wso_form.UserData
+
+	wso_form = null
+	wso = null
+
+	return Customer
+}
+
+function CreateFormInviteFriend(storeId, val_cutomerId)
+{
+    wso2 = new ActiveXObject("Scripting.WindowSystemObject")
+
+    wso2.EnableVisualStyles = true
+
+    wso_form1 = wso2.CreateForm(0,0,0,0)
+
+    wso_form1.ClientWidth = 260
+    wso_form1.ClientHeight = 120
+    wso_form1.ToolWindow = true
+	wso_form1.Text = "Пригласить друга"
+	wso_form1.SizeGrip = false
+    wso_form1.Height = 120
+    wso_form1.Left = 0
+    wso_form1.Top = 0
+    wso_form1.Width = 260
+
+    wso_form1.CenterControl()
+
+    //txt
+    _txt_family = wso_form1.CreateEdit(2, 2, 92, 19)
+    _txt_family.Text = "Полное имя:"
+    _txt_family.ClientHeight = 19
+    _txt_family.ClientWidth = 92
+    _txt_family.ParentColor = -1
+    _txt_family.Border = 0
+    _txt_family.ReadOnly = -1
+	_txt_family.Id = "txt_family"
+
+    _txt_phone = wso_form1.CreateEdit(2, 32, 92, 19)
+    _txt_phone.Text = "Телефон:"
+    _txt_phone.ClientHeight = 19
+    _txt_phone.ClientWidth = 92
+    _txt_phone.ParentColor = -1
+    _txt_phone.Border = 0
+    _txt_phone.ReadOnly = -1
+    _txt_phone.Id = "txt_phone"
+
+    //val
+    _val_family = wso_form1.CreateEdit(99, 2, 150, 19)
+    _val_family.ClientHeight = 19
+    _val_family.ClientWidth = 146
+	_val_family.Id = "val_family"
+
+	_val_phone = wso_form1.CreateEdit(99, 32, 150, 19)
+    _val_phone.ClientHeight = 19
+    _val_phone.ClientWidth = 146
+	_val_phone.Id = "val_phone"
+
+	_val_cutomerId = wso_form1.CreateEdit(0, 92, 1, 1)
+    _val_cutomerId.Text = val_cutomerId
+    _val_cutomerId.Id = "val_cutomerId"
+
+	_val_storeId = wso_form1.CreateEdit(0, 257, 1, 1)
+    _val_storeId.Text = storeId
+    _val_storeId.Id = "val_storeId"
+
+	b_save = wso_form1.CreateButton(0, 62, 253, 28, "Пригласить")
+    b_save.OnClick = wso_ButtonClick_Invite
+
+    wso_form1.ShowModal()
+
+    wso2.Run()
+
+	wso_form1 = null
+	wso2 = null
+
+}
+
+
+
+function CalcDisc()
+{
+    PromoCode = frontol.actions.inputString("Номер карты, телефон: ", "", 13)
+    if (PromoCode==null)
+    {
+        return 0
+    }
+
+    CompanyReq = GetCompany()
+    Company = JSON.parse(CompanyReq)
+    if (Company==null)
+    {
+        frontol.actions.showMessage("Не найдена компания", Icon.Error)
+        return 0
+    }
+
+    /* StoreReq = GetStore()
+    Store = JSON.parse(StoreReq)
+    if (Store==null)
+    {
+        frontol.actions.showMessage("Не найден магазин", Icon.Error)
+        return 0
+    } */
+
+	StoreSettingReq = GetStoreSetting()
+    StoreSetting = JSON.parse(StoreSettingReq)
+    if (StoreSetting!=null)
+    {
+        maxWriteOff = StoreSetting.maxWriteOffPercent
+    }
+
+	storeId = Get_id_store()
+
+	sellerId = 1
+
+	SellerReq = GetSellerId(storeId)
+    Seller = JSON.parse(SellerReq)
+    if (Seller!=null)
+    {
+		if (Seller.length==1){
+			sellerId = Seller[0].id_seller
+		}
+    }
+
+	var info = []
+
+    CustomerInfoReq = GetCustomerInfoByPhone(PromoCode)
+    CustomersPhone = JSON.parse(CustomerInfoReq)
+
+	for (var prom in CustomersPhone.items) {
+
+		info.push(CustomersPhone.items[prom])
+	}
+
+	CustomerInfoReq = GetCustomerInfoByCard(PromoCode)
+	CustomersCard = JSON.parse(CustomerInfoReq)
+
+    for (var prom in CustomersCard.items) {
+
+		info.push(CustomersCard.items[prom])
+	}
+
+	Customer = null
+
+	if (info.length>1){
+		Strings = ""
+        for (var prom in info) {
+
+			str = info[prom].fullName
+
+            Strings = Strings+str+"\n"
+	    }
+		SelProm = frontol.actions.selectString("Список клиентов:", Strings)
+
+		if (SelProm!=null){
+			Customer = info[SelProm-1]
+		}
+
+	}
+	else if(info.length==1){
+		Customer = info[0]
+	}
+
+	Customer = CreateFormClientInfo(Customer, storeId, sellerId, PromoCode)
+
+	if (Customer.customerId==null){
+		return 0
+	}
+
+	SelProm = null
+
+    PromotionsReq = GetPromotions()
+    Promotions = JSON.parse(PromotionsReq)
+    if (Promotions!=null)
+    {
+		Strings = ""
+        for (var prom in Promotions.items) {
+
+            Strings = Strings+Promotions.items[prom].title+"\n"
+		}
+
+		Strings = Strings+"Без акции"+"\n"
+
+		SelProm = frontol.actions.selectString("Доступные акции:", Strings)
+		if (SelProm==null){
+			return 0
+		}
+    }
+
+    promotionId = null
+    percentPerPurchase = 0
+    totalAmountCustomer_val = 0
+    decreaseOnPercent = 0
+
+    TotalAmountCustomerReq = GetTotalAmount(Customer.customerId)
+    TotalAmountCustomer = JSON.parse(TotalAmountCustomerReq)
+    if (TotalAmountCustomer!=null)
+    {
+        totalAmountCustomer_val = TotalAmountCustomer.totalAmount
+    }
+
+	MaxAvailableSumm = Math.floor(frontol.currentDocument.sum*maxWriteOff/100)
+
+    if (!((SelProm)>Promotions.items.length))
+    {
+        percentPerPurchase = Promotions.items[SelProm-1].percentPerPurchase
+        decreaseOnPercent = Promotions.items[SelProm-1].decreaseOnPercent
+
+        promotionId = Promotions.items[SelProm-1].promotionId
+
+    }
+
+    TextMessage = GetTextMessage(Customer, totalAmountCustomer_val, percentPerPurchase, decreaseOnPercent, MaxAvailableSumm)
+
+
+	SummProm = decreaseOnPercent*frontol.currentDocument.sum/100
+
+	SummBonus = 0
+
+    SummBonusNotCorrect = true
+	if(MaxAvailableSumm==0){
+	    SummBonusNotCorrect = false
+	}
+
+	SummBonus_dop = 0
+    while (SummBonusNotCorrect)
+    {
+		s = 0
+		if(MaxAvailableSumm>totalAmountCustomer_val+SummProm){
+
+			s = totalAmountCustomer_val
+		}
+		else if(MaxAvailableSumm>totalAmountCustomer_val)
+		{
+			s = totalAmountCustomer_val-(MaxAvailableSumm-totalAmountCustomer_val+SummProm)
+		}
+		else{
+			s = MaxAvailableSumm-SummProm
+		}
+
+        SummBonus_dop = frontol.actions.inputString(TextMessage, 0, 8)
+        if (SummBonus_dop==null)
+        {
+			return 0
+        }
+        if (SummBonus_dop==0)
+        {
+			SummBonus_dop = 0
+
+			break
+            //return SummProm
+        }
+
+        SummBonusNotCorrect = (SummBonus_dop=="" || isNaN(SummBonus_dop) || 0>SummBonus_dop)
+        if (SummBonusNotCorrect)
+        {
+            frontol.actions.showMessage("Не корректная сумма", Icon.Error)
+			continue
+        }
+
+
+
+		_sum = frontol.currentDocument.sum - parseFloat(SummBonus_dop)
+
+
+	    disc = decreaseOnPercent*_sum/100+parseFloat(SummBonus_dop)
+
+		if (disc>MaxAvailableSumm)
+        {
+            frontol.actions.showMessage("Не корректная сумма", Icon.Error)
+            SummBonusNotCorrect = true
+        }
+
+    }
+
+	_sum = frontol.currentDocument.sum - parseFloat(SummBonus_dop)
+
+	disc = decreaseOnPercent*_sum/100+parseFloat(SummBonus_dop)
+
+    frontol.currentDocument.userValues.set("PromoCode", PromoCode)
+	frontol.currentDocument.userValues.set("sellerId", sellerId)
+    frontol.currentDocument.userValues.set("SummBonus", parseFloat(SummBonus_dop))
+    frontol.currentDocument.userValues.set("CustomerInfo", JSON.stringify(Customer))
+    frontol.currentDocument.userValues.set("customerId", Customer.customerId)
+    frontol.currentDocument.userValues.set("Prom", JSON.stringify(prom))
+    frontol.currentDocument.userValues.set("PromotionsReq", PromotionsReq)
+    frontol.currentDocument.userValues.set("promotionId", JSON.stringify(promotionId))
+    frontol.currentDocument.userValues.set("storeId", storeId)
+
+    return disc
+}
+
+function BeforeCloseDoc()
+{
+	if(frontol.currentDocument.type.code==1)
+    {
+		customerId = frontol.currentDocument.userValues.get("customerId")
+
+	    customerIdNotCorrect = (customerId==null || customerId=="" || customerId==0)
+
+        if (customerIdNotCorrect==true)
+        {
+
+            return
+        }
+
+		xmlhttp = new ActiveXObject("Microsoft.XMLHTTP")
+        try
+        {
+            xmlhttp.open("POST", GetHttpAdress()+"/api/v1/customers/"+customerId+"/purchases", false)
+        }
+        catch (E)
+        {
+            frontol.actions.showMessage("Ошибка списания баллов.Сервер не доступен", Icon.Error)
+			frontol.actions.showMessage(xmlhttp.status, Icon.Error)
+
+			frontol.actions.cancel()
+
+			return
+        }
+
+		xmlhttp.setRequestHeader("Content-Type", "application/json")
+        xmlhttp.setRequestHeader("Authorization", GetApiKey())
+
+		promotionId = parseInt(frontol.currentDocument.userValues.get("promotionId"))
+        minus =  parseFloat(frontol.currentDocument.userValues.get("SummBonus"))
+        storeId = parseInt(frontol.currentDocument.userValues.get("storeId"))
+		sellerId = frontol.currentDocument.userValues.get("sellerId")
+
+        var _op = {price:roundPlus(frontol.currentDocument.sum, 2), storeId:storeId, sellerId:sellerId, externalId:frontol.currentDocument.number, promotionId:promotionId, minus:minus}
+
+        textPost = JSON.stringify(_op)
+
+		try
+        {
+            xmlhttp.send(textPost);
+	    }
+        catch (E)
+        {
+        }
+        purchaseId = ""
+
+        if(xmlhttp.status!=201)
+        {
+            frontol.actions.showMessage("Ошибка списания баллов.Сервер не списал бонусы", Icon.Error)
+            frontol.actions.showMessage(GetHttpAdress()+"/api/v1/customers/"+customerId+"/purchases", Icon.Error)
+            frontol.actions.showMessage(xmlhttp.status, Icon.Error)
+            frontol.actions.showMessage(textPost, Icon.Error)
+
+            frontol.actions.cancel()
+
+			return
+        }
+        else
+        {
+            op_resp = JSON.parse(xmlhttp.responseText)
+            purchaseId = op_resp.purchaseId
+        }
+
+        frontol.currentDocument.userValues.set("purchaseId",purchaseId)
+        frontol.currentDocument.userValues.set("DateClose", frontol.currentDocument.dateClose)
+        frontol.currentDocument.userValues.set("ReceiptNo", frontol.currentDocument.number)
+        frontol.currentDocument.userValues.set("storeId", storeId)
+        frontol.currentDocument.userValues.set("promotionId", promotionId)
+        frontol.currentDocument.userValues.set("customerId", customerId)
+    }
+    else
+    {
+        purchaseId = frontol.currentDocument.baseDocument.userValues.get("purchaseId")
+        customerId = frontol.currentDocument.baseDocument.userValues.get("customerId")
+
+	    customerIdNotCorrect = (customerId==null || customerId=="" || customerId==0)
+
+        if (customerIdNotCorrect==true)
+        {
+
+            return
+        }
+
+        xmlhttp = new ActiveXObject("Microsoft.XMLHTTP")
+        try
+        {
+            xmlhttp.open("DELETE", GetHttpAdress()+"/api/v1/purchases/"+purchaseId, false)
+        }
+        catch (E)
+        {
+			frontol.actions.showMessage("Ошибка списания баллов.Сервер не доступен", Icon.Error)
+			frontol.actions.showMessage(xmlhttp.status, Icon.Error)
+
+			frontol.actions.cancel()
+
+			return
+        }
+
+        //xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+        xmlhttp.setRequestHeader("Authorization", GetApiKey())
+
+        try
+        {
+            xmlhttp.send(null);
+	    }
+        catch (E)
+        {
+        }
+        if(xmlhttp.status!=204)
+        {
+            frontol.actions.showMessage("Сервер не отменил оплату бонусами", Icon.Error)
+			frontol.actions.showMessage(xmlhttp.status, Icon.Error)
+ 			frontol.actions.showMessage(GetHttpAdress()+"/api/v1/purchases/"+purchaseId, Icon.Error)
+
+			frontol.actions.cancel()
+
+			return
+        }
+
+		frontol.currentDocument.userValues.set("purchaseId",purchaseId)
+        frontol.currentDocument.userValues.set("customerId", customerId)
+    }
+}
