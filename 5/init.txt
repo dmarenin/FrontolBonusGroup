@@ -542,6 +542,21 @@ function debug_mess_box(str){
 	frontol.actions.showMessage(str, Icon.Error)
 }
 
+function debug_write_to_file(str){	
+
+	fso = new ActiveXObject("Scripting.FileSystemObject")
+	
+	ts = fso.OpenTextFile("c:\\int_bg_frontol_log.txt", 8, true)
+	
+    var dt_str_now = new Date().toLocaleString()
+
+	str = dt_str_now+": "+str
+
+	ts.WriteLine(str)
+	
+	ts.Close()
+}
+
 
 function wso_ButtonClick(Sender)
 {
@@ -1013,6 +1028,8 @@ function CreateFormInviteFriend(storeId, val_cutomerId)
 
 function CalcDisc()
 {
+	dt_start = new Date()
+
     PromoCode = frontol.actions.inputString("Номер карты, телефон: ", "", 13)
     if (PromoCode==null)
     {
@@ -1220,11 +1237,15 @@ function CalcDisc()
     frontol.currentDocument.userValues.set("promotionId", JSON.stringify(promotionId))
     frontol.currentDocument.userValues.set("storeId", storeId)
 
+    debug_write_to_file("CalcDisc_time = "+((new Date()-dt_start)/1000).toString())
+	
     return disc
 }
 
 function BeforeCloseDoc()
 {
+	dt_start = new Date()
+	
 	if(frontol.currentDocument.type.code==1)
     {
 		customerId = frontol.currentDocument.userValues.get("customerId")
@@ -1270,6 +1291,12 @@ function BeforeCloseDoc()
 	    }
         catch (E)
         {
+		    frontol.actions.showMessage("Ошибка списания баллов.Сервер не доступен(таймаут)", Icon.Error)
+			frontol.actions.showMessage(xmlhttp.status, Icon.Error)
+
+			frontol.actions.cancel()
+
+			return
         }
         purchaseId = ""
 
@@ -1296,6 +1323,8 @@ function BeforeCloseDoc()
         frontol.currentDocument.userValues.set("storeId", storeId)
         frontol.currentDocument.userValues.set("promotionId", promotionId)
         frontol.currentDocument.userValues.set("customerId", customerId)
+		
+		debug_write_to_file("BeforeCloseDoc_time_1 = "+((new Date()-dt_start)/1000).toString())
     }
     else
     {
@@ -1348,5 +1377,7 @@ function BeforeCloseDoc()
 
 		frontol.currentDocument.userValues.set("purchaseId",purchaseId)
         frontol.currentDocument.userValues.set("customerId", customerId)
+		
+		debug_write_to_file("BeforeCloseDoc_time_2 = "+((new Date()-dt_start)/1000).toString())
     }
 }
